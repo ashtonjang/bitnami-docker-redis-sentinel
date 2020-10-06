@@ -8,6 +8,7 @@ services:
     redis:
         image: 'bitnami/redis:latest'
         environment:
+            - ALLOW_EMPTY_PASSWORD=yes
             - REDIS_REPLICATION_MODE=master
         networks:
             - app-tier
@@ -19,6 +20,7 @@ services:
     redis-slave:
         image: 'bitnami/redis:latest'
         environment:
+            - ALLOW_EMPTY_PASSWORD=yes
             - REDIS_REPLICATION_MODE=slave
             - REDIS_MASTER_HOST=redis
         ports:
@@ -32,6 +34,8 @@ services:
 
     redis-sentinel:
         image: 'bitnami/redis-sentinel:latest'
+        environment:
+            - ALLOW_EMPTY_PASSWORD=yes
         depends_on:
             - redis
             - redis-slave
