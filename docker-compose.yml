@@ -1,18 +1,43 @@
 version: '2'
 
+networks:
+    app-tier:
+        driver: bridge
+
 services:
-  redis-sentinel:
-    image: docker.io/bitnami/redis-sentinel:6.0-debian-10
-    volumes:
-      - redis-sentinel_data:/bitnami
-  redis:
-    image: docker.io/bitnami/redis:6.0-debian-10
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
-    volumes:
-      - redis_data:/bitnami
-volumes:
-  redis-sentinel_data:
-    driver: local
-  redis_data:
-    driver: local
+    redis:
+        image: 'bitnami/redis:latest'
+        environment:
+            - REDIS_REPLICATION_MODE=master
+        networks:
+            - app-tier
+        ports:
+            - '6379'
+        volumes:
+            - /root/redis_data:/bitnami
+
+    redis-slave:
+        image: 'bitnami/redis:latest'
+        environment:
+            - REDIS_REPLICATION_MODE=slave
+            - REDIS_MASTER_HOST=redis
+        ports:
+            - '6379'
+        depends_on:
+            - redis
+        networks:
+            - app-tier
+        volumes:
+            - /root/redis_slave_data:/bitnami
+
+    redis-sentinel:
+        image: 'bitnami/redis-sentinel:latest'
+        depends_on:
+            - redis
+            - redis-slave
+        ports:
+            - '26379-26381:26379'
+        networks:
+            - app-tier
+        volumes:
+            - /root/redis_sentinel_data:/bitnami
