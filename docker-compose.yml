@@ -39,5 +39,3 @@ services:
             - '26379-26381:26379'
         networks:
             - app-tier
-        volumes:
-            - /root/redis_sentinel_data:/bitnami
